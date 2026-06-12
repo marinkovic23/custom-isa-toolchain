@@ -114,7 +114,7 @@ void Linker::mergeSections() {
         ObjectFile& obj = objectFiles[objIndex];
         for (auto& pair : obj.sections) {
             Section& inputSec = pair.second;
-            std::string name = inputSet.name;
+            std::string name = inputSec.name;
 
             if (outputSections.find(name) == outputSections.end()) {
                 OutputSection outSec;
@@ -139,5 +139,67 @@ void Linker::mergeSections() {
 
     }
 }
+
+
+void Linker::resolveSymbols() {
+
+    //prvi prolaz, definisemo sve simbole
+
+    for (ObjectFile& obj : objectFiles) {
+        for (const auto& pair : obj.symbols) {
+            const Symbol& sym = pair.second;
+
+            if (!sym.defined) continue;
+
+            const Section& sec = obj.sections.at(sym.section);
+
+            uint32_t finalAddress = sec.baseAddress + sym.offset;
+
+            obj.localResolvedSymbols[sym.name] = finalAddress;
+
+            if (sym.bind == SymbolBind::GLOBAL) {
+                if (resolvedSymbols.find(sym.name) != resolvedSymbols.end()) throw runtime_error("Multiple definition of symbol: " + sym.name);
+        
+                resolvedSymbols[sym.name] = {sym.name, finalAddress};        
+            }
+
+
+
+        
+        }
+    }
+    //drugi prolaz, gledamo eksterne simbole
+
+    for (ObjectFile& obj : objectFiles) {
+        for (const auto& pair : obj.symbols) {
+            const Symbol& sym = pair.second;
+
+            if (sym.bind == SymbolBind::EXTERN) {
+                if (resolvedSymbols.find(sym.name) == resolvedSymbols.end()) {
+                    throw runtime_error("Unresolved external symbol: " + sym.name);
+                }
+            }
+        }
+    }
+
+}
+
+
+
+uint32_t Linker::resolveSymbolForObject(const ObjectFile& obj, const std::string& symbol) {
+    auto localIt = obj.localResolvedSymbols.find(symbol);
+
+    if (localIt != obj.localResolvedSymbols.end()) return localIt->second;
+
+    auto globalIt = resolvedSymbols.find(symbol);
+
+    if (globalIt != resolvedSymbols.end()) return globalIt->second.address;
+
+    throw runtime_error("Unresolved symbol in relocation: " + symbol);
+}
+
+
+
+
 
 

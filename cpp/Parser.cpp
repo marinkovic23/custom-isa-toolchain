@@ -3,26 +3,29 @@
 #include <cctype>
 #include <iostream>
 #include <fstream>
-#include <stringstream>
+#include <sstream>
 
 
 using namespace std;
 
 vector<ParsedLine> lines;
 
+void removeComment(string& line) {
+    size_t pos = line.find('#');
+    if (pos != string::npos) line = line.substr(0, pos);
+}
 
-//helpers
-ParsedLine Parser::parseLine(string line) {
-    line = removeComment(line);
-    trim(line);
-    ParsedLine result;
+void extractOperands(string& line, ParsedLine& result) {
+    string current;
+    stringstream ss(line);
 
-    extractLabel(line, result);
-    extractMnemonic(line, result);
-    extractOperands(line, result);
+    while(getline(ss, current, ',')) {
+        trim(current);
+        if(!current.empty()) {
+            result.operands.push_back(current);
+        }
+    }
 
-
-    return result;
 }
 
 
@@ -31,7 +34,7 @@ void extractLabel(string& line, ParsedLine& result) {
 
     if (colon == string::npos) return;
 
-    string beforeColon = line.susbtr(0, colon);
+    string beforeColon = line.substr(0, colon);
     
     trim(beforeColon);
 
@@ -60,34 +63,28 @@ void extractMnemonic(string& line, ParsedLine& result) {
 
 }
 
-void extractOperands(string& line, ParsedLine& result) {
-    string current;
-    stringstream ss(line);
 
-    while(getline(ss, current, ',')) {
-        trim(current);
-        if(!current.empty()) {
-            result.operands.push_back(current);
-        }
-    }
 
+//helpers
+ParsedLine Parser::parseLine(string line) {
+    removeComment(line);
+    trim(line);
+    ParsedLine result;
+
+    extractLabel(line, result);
+    extractMnemonic(line, result);
+    extractOperands(line, result);
+
+
+    return result;
 }
 
 
-void trim(string& line) {
 
-    size_t start = 0;
-    while (start < line.size() && isspace(line[start])) start++;
-    size_t end = line.size();
 
-    while(end > start && isspace(line[end - 1])) end--;
-    line = line.substr(start, end - start);
-}
 
-void removeComment(string& line) {
-    size_t pos = line.find('#');
-    if (pos != string::npos) line = line.substr(0, pos);
-}
+
+
 
 
 

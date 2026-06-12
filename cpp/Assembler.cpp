@@ -67,6 +67,8 @@ void Assembler::processDirective(const ParsedLine& line) {
 
 void Assembler::emitByte(uint8_t byte) {
     if (currentSection == nullptr) throw runtime_error("No active section");
+
+    currentSection->bytes.push_back(byte);
 }
 
 void Assembler::emitWord(uint32_t value) {
@@ -248,7 +250,7 @@ JumpTarget Assembler::parseJumpTarget(const string& op) {
     JumpTarget target;
     if (isNumber(op)) {
         target.kind = JumpTargetKind::LITERAL;
-        target.literal = target.literal = stoi(op);
+        target.literal = stoi(op);
     }
     else {
         target.kind = JumpTargetKind::SYMBOL;
@@ -384,6 +386,8 @@ Operand Assembler::parseOperand(const string& raw) {
         return result;
 
     }
+
+    return result; //videcemo
 
 }
 

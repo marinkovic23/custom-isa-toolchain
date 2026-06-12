@@ -1,6 +1,7 @@
 #ifndef __LINKER_H__
 #define __LINKER_H__
 
+
 #include "Common.hpp"
 #include "Section.hpp"
 #include "Symbol.hpp"
@@ -12,6 +13,9 @@ typedef struct {
     std::unordered_map <std::string, Section> sections;
     std::unordered_map <std::string, Symbol> symbols;
     std::vector <Relocation> relocations;
+
+    std::unordered_map <std::string, uint32_t> localResolvedSymbols;
+
 } ObjectFile;
 
 
@@ -32,6 +36,11 @@ typedef struct {
     std::vector <uint8_t> bytes;
 } OutputSection;
 
+typedef struct {
+    std::string name;
+    uint32_t address;
+} ResolvedSymbol;
+
 
 
 class Linker {
@@ -51,6 +60,8 @@ private:
     std::vector<std::string> outputSectionOrder;
     std::unordered_map<std::string, uint32_t> placeOptions;
 
+    std::unordered_map <std::string, ResolvedSymbol> resolvedSymbols;
+
 
 
     void mergeSections();
@@ -66,6 +77,9 @@ private:
     void readSymbols(std::ifstream& in, ObjectFile& obj);
 
     void readRelocations(std::ifstream& in, ObjectFile& obj);
+
+
+    void resolveSymbols(); //vrv ce preci u public
 
 
 };

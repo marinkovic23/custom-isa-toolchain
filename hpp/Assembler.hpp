@@ -101,7 +101,7 @@ private:
 
     // helpers here
     bool isNumber(const std::string& s);
-    JumpTarget parseJumpTarget(const string& op);
+    JumpTarget parseJumpTarget(const std::string& op);
     void addRelocation(uint32_t offset, const std::string& symbol);
 
 
@@ -111,7 +111,7 @@ private:
 
     void encodeBranch(const ParsedLine& line, uint8_t mode);
 
-    Operand parseOperand(const string& operand);
+    Operand parseOperand(const std::string& operand);
 
 
     void encodeLd(const ParsedLine& line);
