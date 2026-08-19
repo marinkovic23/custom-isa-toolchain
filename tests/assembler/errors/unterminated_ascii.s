@@ -1,0 +1,2 @@
+.section data
+.ascii "unterminated
